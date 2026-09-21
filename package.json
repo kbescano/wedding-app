@@ -7,6 +7,8 @@
   "scripts": {
     "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
     "devsafe": "rm -rf .next && cross-env NODE_OPTIONS=--no-deprecation next dev",
+    "prebuild": "node -e \"require('fs').rmSync('.next/cache',{recursive:true,force:true})\"",
+    "postbuild": "node -e \"require('fs').rmSync('.next/cache',{recursive:true,force:true})\"",
     "build": "cross-env NODE_OPTIONS=\"--no-deprecation --max-old-space-size=8000\" next build",
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
     "seed": "cross-env NODE_OPTIONS=--no-deprecation payload run src/seed.ts",
