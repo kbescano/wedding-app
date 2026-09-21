@@ -2,10 +2,20 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { Armchair, Gamepad2, Images, KeyRound, Lock, LogOut, MailOpen, MessageCircleHeart, LayoutDashboard } from 'lucide-react'
-import { useAuth } from './AuthContext.jsx'
-import { useToast } from './Toast.jsx'
-import { initials } from '../lib/format.js'
+import {
+  Armchair,
+  Gamepad2,
+  Images,
+  KeyRound,
+  Lock,
+  LogOut,
+  MailOpen,
+  MessageCircleHeart,
+  LayoutDashboard,
+} from 'lucide-react'
+import { useAuth } from './AuthContext'
+import { useToast } from './Toast'
+import { initials } from '../lib/format'
 
 const ITEMS = [
   { to: '/', label: 'Invitation', icon: MailOpen },
@@ -17,7 +27,7 @@ const ITEMS = [
 
 const useActive = () => {
   const pathname = usePathname()
-  return (to) => (to === '/' ? pathname === '/' : pathname.startsWith(to))
+  return (to: string) => (to === '/' ? pathname === '/' : pathname.startsWith(to))
 }
 
 export function TopNav() {
@@ -51,7 +61,13 @@ export function TopNav() {
             <Link key={to} href={to} className="topnav-link" aria-current={active ? 'page' : undefined}>
               <span>{label}</span>
               {locked && <Lock size={11} className="lock-dot" aria-hidden />}
-              {active && <motion.i layoutId="nav-underline" className="topnav-underline" transition={{ type: 'spring', stiffness: 400, damping: 34 }} />}
+              {active && (
+                <motion.i
+                  layoutId="nav-underline"
+                  className="topnav-underline"
+                  transition={{ type: 'spring', stiffness: 400, damping: 34 }}
+                />
+              )}
             </Link>
           )
         })}
@@ -68,7 +84,7 @@ export function TopNav() {
             <KeyRound size={14} /> <span>Guest sign-in</span>
           </button>
         )}
-        {role === 'guest' && <span className="hello">Hello, {guest.name.split(' ')[0]}</span>}
+        {role === 'guest' && <span className="hello">Hello, {guest?.name.split(' ')[0]}</span>}
         {role && (
           <button className="icon-btn" onClick={signOut} aria-label="Sign out" title="Sign out">
             <LogOut size={17} />
@@ -94,7 +110,13 @@ export function BottomNav() {
         const active = isActive(to)
         return (
           <Link key={to} href={to} className="bottomnav-link" aria-current={active ? 'page' : undefined}>
-            {active && <motion.i layoutId="bottom-pill" className="bottomnav-pill" transition={{ type: 'spring', stiffness: 420, damping: 32 }} />}
+            {active && (
+              <motion.i
+                layoutId="bottom-pill"
+                className="bottomnav-pill"
+                transition={{ type: 'spring', stiffness: 420, damping: 32 }}
+              />
+            )}
             <span className="bottomnav-icon">
               <Icon size={20} strokeWidth={active ? 2.2 : 1.7} />
               {!canView && <Lock size={9} className="lock-badge" aria-hidden />}

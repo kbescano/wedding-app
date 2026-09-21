@@ -1,8 +1,8 @@
 'use client'
 import { useEffect, useRef } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { useAuth } from './AuthContext.jsx'
-import { useToast } from './Toast.jsx'
+import { useAuth } from './AuthContext'
+import { useToast } from './Toast'
 
 /** Personal invitation links (/i/CODE -> /?code=CODE) sign the guest in automatically. */
 export default function ViewerEffects() {
@@ -25,7 +25,7 @@ export default function ViewerEffects() {
         toast(`Welcome, ${res.guest.name}`)
         clear()
       })
-      .catch((err) => setLoginNotice(err.message))
+      .catch((err: Error) => setLoginNotice(err.message))
   }, [code, role]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return null

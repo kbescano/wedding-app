@@ -1,20 +1,50 @@
+import type { MessageView, PhotoView, SeatingTable } from './views'
+
 /** Placeholder content shown behind the blur. None of it is real guest data. */
-export const FAKE_PHOTOS = [
-  { id: -1, tone: ['#1F3A2E', '#C9A15B'], ratio: 1.3, author: 'A guest', caption: 'A moment from the day' },
-  { id: -2, tone: ['#E8DCC4', '#8C5A3C'], ratio: 0.78, author: 'A guest', caption: 'Something to remember' },
-  { id: -3, tone: ['#6B7F5E', '#F7F2E8'], ratio: 1, author: 'A guest', caption: '' },
-  { id: -4, tone: ['#3C2D28', '#DEBE8C'], ratio: 1.4, author: 'A guest', caption: 'Golden hour' },
-  { id: -5, tone: ['#C9A15B', '#1F3A2E'], ratio: 0.9, author: 'A guest', caption: 'Cheers' },
-  { id: -6, tone: ['#8C5A3C', '#E8DCC4'], ratio: 1.2, author: 'A guest', caption: '' },
-  { id: -7, tone: ['#1F3A2E', '#E8DCC4'], ratio: 0.8, author: 'A guest', caption: 'Together' },
-  { id: -8, tone: ['#DEBE8C', '#3C2D28'], ratio: 1.1, author: 'A guest', caption: '' },
-].map((p) => ({ ...p, created_at: new Date().toISOString(), mine: false }));
+export type PlaceholderPhoto = PhotoView & { tone?: [string, string]; ratio?: number }
 
-export const FAKE_MESSAGES = [
-  { id: -1, author: 'A guest', body: 'Wishing you both a lifetime of joy, laughter and very long dinners together.', created_at: new Date().toISOString() },
-  { id: -2, author: 'A guest', body: 'So happy for you. Can’t wait to celebrate with everyone who loves you.', created_at: new Date().toISOString() },
-  { id: -3, author: 'A guest', body: 'From the first hello to this day. Congratulations, with all our love.', created_at: new Date().toISOString() },
-  { id: -4, author: 'A guest', body: 'Thank you for letting us be part of it.', created_at: new Date().toISOString() },
-];
+const now = new Date().toISOString()
 
-export const FAKE_TABLES = [1, 2, 3, 4, 5, 6].map((n) => ({ label: `Table ${n}`, guests: ['A guest', 'A guest', 'A guest', 'A guest'] }));
+const photo = (id: number, tone: [string, string], ratio: number, caption: string): PlaceholderPhoto => ({
+  id,
+  url: '',
+  thumb: '',
+  tone,
+  ratio,
+  author: 'A guest',
+  caption,
+  created_at: now,
+  mine: false,
+})
+
+export const FAKE_PHOTOS: PlaceholderPhoto[] = [
+  photo(-1, ['#1F3A2E', '#C9A15B'], 1.3, 'A moment from the day'),
+  photo(-2, ['#E8DCC4', '#8C5A3C'], 0.78, 'Something to remember'),
+  photo(-3, ['#6B7F5E', '#F7F2E8'], 1, ''),
+  photo(-4, ['#3C2D28', '#DEBE8C'], 1.4, 'Golden hour'),
+  photo(-5, ['#C9A15B', '#1F3A2E'], 0.9, 'Cheers'),
+  photo(-6, ['#8C5A3C', '#E8DCC4'], 1.2, ''),
+  photo(-7, ['#1F3A2E', '#E8DCC4'], 0.8, 'Together'),
+  photo(-8, ['#DEBE8C', '#3C2D28'], 1.1, ''),
+]
+
+const message = (id: number, body: string): MessageView => ({
+  id,
+  author: 'A guest',
+  body,
+  private: false,
+  created_at: now,
+  mine: false,
+})
+
+export const FAKE_MESSAGES: MessageView[] = [
+  message(-1, 'Wishing you both a lifetime of joy, laughter and very long dinners together.'),
+  message(-2, 'So happy for you. Can’t wait to celebrate with everyone who loves you.'),
+  message(-3, 'From the first hello to this day. Congratulations, with all our love.'),
+  message(-4, 'Thank you for letting us be part of it.'),
+]
+
+export const FAKE_TABLES: SeatingTable[] = [1, 2, 3, 4, 5, 6].map((n) => ({
+  label: `Table ${n}`,
+  guests: ['A guest', 'A guest', 'A guest', 'A guest'],
+}))

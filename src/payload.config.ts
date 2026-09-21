@@ -21,7 +21,8 @@ const dirname = path.dirname(filename)
 // Development and production use separate SQLite files by default: dev syncs its schema automatically, production
 // runs the migrations in ./migrations. Set DATABASE_URI to point at a persistent path on your server.
 const databaseURI =
-  process.env.DATABASE_URI || (process.env.NODE_ENV === 'production' ? 'file:./data/wedding.db' : 'file:./data/wedding-dev.db')
+  process.env.DATABASE_URI ||
+  (process.env.NODE_ENV === 'production' ? 'file:./data/wedding.db' : 'file:./data/wedding-dev.db')
 if (databaseURI.startsWith('file:')) {
   fs.mkdirSync(path.dirname(path.resolve(databaseURI.slice('file:'.length))), { recursive: true })
 }

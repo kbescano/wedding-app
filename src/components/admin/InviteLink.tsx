@@ -29,7 +29,8 @@ export const InviteLink: React.FC = () => {
   const message = `Hi ${first}! You're invited to our wedding. Open your personal invitation here: ${link}\n\nYour invitation code: ${formatCode(code)}`
 
   useEffect(() => {
-    if (link) QRCode.toDataURL(link, { margin: 1, width: 220, color: { dark: '#1E3B2E', light: '#FBF7EE' } }).then(setQr)
+    if (link)
+      QRCode.toDataURL(link, { margin: 1, width: 220, color: { dark: '#1E3B2E', light: '#FBF7EE' } }).then(setQr)
     else setQr('')
   }, [link])
 
@@ -51,19 +52,59 @@ export const InviteLink: React.FC = () => {
         </p>
       ) : (
         <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', alignItems: 'flex-start' }}>
-          {qr && <img src={qr} alt={`QR code for ${name}'s invitation`} width={130} height={130} style={{ border: '1px solid var(--theme-elevation-100)' }} />}
+          {qr && (
+            <img
+              src={qr}
+              alt={`QR code for ${name}'s invitation`}
+              width={130}
+              height={130}
+              style={{ border: '1px solid var(--theme-elevation-100)' }}
+            />
+          )}
           <div style={{ flex: '1 1 260px', minWidth: 0 }}>
-            <div style={{ fontSize: 12, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--theme-elevation-600)' }}>
+            <div
+              style={{
+                fontSize: 12,
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase',
+                color: 'var(--theme-elevation-600)',
+              }}
+            >
               Invitation code
             </div>
-            <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '0.08em', marginBottom: 8 }}>{formatCode(code)}</div>
-            <input readOnly value={link} onFocus={(e) => e.currentTarget.select()} style={{ width: '100%', marginBottom: 10, fontSize: 16 }} />
+            <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '0.08em', marginBottom: 8 }}>
+              {formatCode(code)}
+            </div>
+            <input
+              readOnly
+              value={link}
+              onFocus={(e) => e.currentTarget.select()}
+              style={{ width: '100%', marginBottom: 10, fontSize: 16 }}
+            />
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              <button type="button" style={btn} onClick={() => copy(link, 'Link copied')}>Copy link</button>
-              <button type="button" style={btn} onClick={() => copy(message, 'Message copied')}>Copy message</button>
-              <a style={btn} href={`https://wa.me/?text=${encodeURIComponent(message)}`} target="_blank" rel="noreferrer">WhatsApp</a>
-              <a style={btn} href={`mailto:?subject=${encodeURIComponent('Your wedding invitation')}&body=${encodeURIComponent(message)}`}>Email</a>
-              <a style={btn} href={`sms:?&body=${encodeURIComponent(message)}`}>Text</a>
+              <button type="button" style={btn} onClick={() => copy(link, 'Link copied')}>
+                Copy link
+              </button>
+              <button type="button" style={btn} onClick={() => copy(message, 'Message copied')}>
+                Copy message
+              </button>
+              <a
+                style={btn}
+                href={`https://wa.me/?text=${encodeURIComponent(message)}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                WhatsApp
+              </a>
+              <a
+                style={btn}
+                href={`mailto:?subject=${encodeURIComponent('Your wedding invitation')}&body=${encodeURIComponent(message)}`}
+              >
+                Email
+              </a>
+              <a style={btn} href={`sms:?&body=${encodeURIComponent(message)}`}>
+                Text
+              </a>
             </div>
           </div>
         </div>

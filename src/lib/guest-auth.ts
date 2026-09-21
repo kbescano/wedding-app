@@ -30,9 +30,9 @@ export const codeFingerprint = (code: string) =>
   crypto.createHash('sha256').update(`${secret()}:${code}`).digest('hex').slice(0, 12)
 const sign = (body: string) => crypto.createHmac('sha256', secret()).update(body).digest('base64url')
 
-export function createGuestToken(guest: { id: number | string; code: string }): string {
+export function createGuestToken(guest: { id: number | string; code?: string | null }): string {
   const exp = Math.floor(Date.now() / 1000) + GUEST_TTL_SECONDS
-  const body = `${guest.id}.${exp}.${codeFingerprint(guest.code)}`
+  const body = `${guest.id}.${exp}.${codeFingerprint(guest.code ?? '')}`
   return `${body}.${sign(body)}`
 }
 

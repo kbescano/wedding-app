@@ -5,7 +5,11 @@ import { isAdmin } from '../lib/access'
 export const QuizAnswers: CollectionConfig = {
   slug: 'quiz-answers',
   labels: { singular: 'Quiz answer', plural: 'Quiz answers' },
-  admin: { group: 'Wedding', defaultColumns: ['guest', 'question', 'correct', 'createdAt'], description: 'Delete rows here to reset scores.' },
+  admin: {
+    group: 'Wedding',
+    defaultColumns: ['guest', 'question', 'correct', 'createdAt'],
+    description: 'Delete rows here to reset scores.',
+  },
   access: { read: isAdmin, create: () => false, update: () => false, delete: isAdmin },
   indexes: [{ fields: ['guest', 'question'], unique: true }],
   fields: [

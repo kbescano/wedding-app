@@ -68,18 +68,41 @@ export const Event: GlobalConfig = {
             {
               type: 'row',
               fields: [
-                { name: 'date', type: 'text', required: true, defaultValue: '2027-05-15', validate: ymd, label: 'Wedding date', admin: { description: 'Format: 2027-05-15' } },
-                { name: 'time', type: 'text', required: true, defaultValue: '16:00', validate: hhmm, label: 'Ceremony time', admin: { description: '24-hour, e.g. 16:00' } },
+                {
+                  name: 'date',
+                  type: 'text',
+                  required: true,
+                  defaultValue: '2027-05-15',
+                  validate: ymd,
+                  label: 'Wedding date',
+                  admin: { description: 'Format: 2027-05-15' },
+                },
+                {
+                  name: 'time',
+                  type: 'text',
+                  required: true,
+                  defaultValue: '16:00',
+                  validate: hhmm,
+                  label: 'Ceremony time',
+                  admin: { description: '24-hour, e.g. 16:00' },
+                },
               ],
             },
-            { name: 'note', type: 'text', maxLength: 200, defaultValue: 'We can’t wait to celebrate with you.', label: 'A few words on the invitation' },
+            {
+              name: 'note',
+              type: 'text',
+              maxLength: 200,
+              defaultValue: 'We can’t wait to celebrate with you.',
+              label: 'A few words on the invitation',
+            },
             { name: 'venue', type: 'text', defaultValue: 'The Glasshouse at Willow Bend' },
             { name: 'address', type: 'text', defaultValue: '12 Orchard Lane, Willow Bend' },
             {
               name: 'mapUrl',
               type: 'text',
               label: 'Map link (optional)',
-              validate: (v: unknown) => !v || /^https?:\/\//.test(String(v)) || 'Use a full link starting with https://',
+              validate: (v: unknown) =>
+                !v || /^https?:\/\//.test(String(v)) || 'Use a full link starting with https://',
             },
           ],
         },
@@ -91,7 +114,8 @@ export const Event: GlobalConfig = {
               name: 'dressNote',
               type: 'textarea',
               maxLength: 300,
-              defaultValue: 'Think deep greens, warm neutrals and soft golds. Flats or block heels are best, as the lawn is soft.',
+              defaultValue:
+                'Think deep greens, warm neutrals and soft golds. Flats or block heels are best, as the lawn is soft.',
             },
             {
               name: 'swatches',
@@ -100,7 +124,15 @@ export const Event: GlobalConfig = {
               maxRows: 8,
               labels: { singular: 'Colour', plural: 'Colours' },
               defaultValue: ['#1F3A2E', '#6B7F5E', '#C9A15B', '#E8DCC4', '#8C5A3C'].map((color) => ({ color })),
-              fields: [{ name: 'color', type: 'text', required: true, validate: hex, admin: { description: 'Hex colour, e.g. #1E3B2E' } }],
+              fields: [
+                {
+                  name: 'color',
+                  type: 'text',
+                  required: true,
+                  validate: hex,
+                  admin: { description: 'Hex colour, e.g. #1E3B2E' },
+                },
+              ],
             },
           ],
         },
@@ -123,7 +155,12 @@ export const Event: GlobalConfig = {
                 {
                   type: 'row',
                   fields: [
-                    { name: 'time', type: 'text', validate: hhmm, admin: { width: '25%', description: '24-hour, e.g. 16:00' } },
+                    {
+                      name: 'time',
+                      type: 'text',
+                      validate: hhmm,
+                      admin: { width: '25%', description: '24-hour, e.g. 16:00' },
+                    },
                     { name: 'title', type: 'text', required: true, admin: { width: '75%' } },
                   ],
                 },
@@ -135,13 +172,22 @@ export const Event: GlobalConfig = {
         {
           label: 'RSVP',
           fields: [
-            { name: 'rsvpDeadline', type: 'text', validate: ymd, label: 'Reply-by date', defaultValue: '2027-04-15', admin: { description: 'Format: 2027-04-15' } },
+            {
+              name: 'rsvpDeadline',
+              type: 'text',
+              validate: ymd,
+              label: 'Reply-by date',
+              defaultValue: '2027-04-15',
+              admin: { description: 'Format: 2027-04-15' },
+            },
             {
               name: 'mealOptions',
               type: 'array',
               maxRows: 10,
               labels: { singular: 'Meal option', plural: 'Meal options' },
-              defaultValue: ['Herb-roasted chicken', 'Seared salmon', 'Wild mushroom risotto (vegetarian)'].map((option) => ({ option })),
+              defaultValue: ['Herb-roasted chicken', 'Seared salmon', 'Wild mushroom risotto (vegetarian)'].map(
+                (option) => ({ option }),
+              ),
               fields: [{ name: 'option', type: 'text', required: true, maxLength: 80 }],
             },
           ],

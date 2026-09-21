@@ -37,7 +37,7 @@ const codeLogin: PayloadHandler = async (req) => {
         overrideAccess: true,
       })
     : null
-  const guest = found?.docs?.[0] as any
+  const guest = found?.docs?.[0]
   if (!guest) {
     attempts.set(key, [...recent, now])
     return Response.json(
@@ -77,7 +77,11 @@ const quizTag: PayloadHandler = async (req) => {
     return Response.json({ error: 'Invalid mode.' }, { status: 400 })
   }
   const where: Where =
-    mode === 'attending' ? { rsvp: { equals: 'yes' } } : mode === 'all' ? { id: { exists: true } } : { unlocked: { equals: true } }
+    mode === 'attending'
+      ? { rsvp: { equals: 'yes' } }
+      : mode === 'all'
+        ? { id: { exists: true } }
+        : { unlocked: { equals: true } }
   const res = await req.payload.update({
     collection: 'guests',
     where,
@@ -125,15 +129,15 @@ export const Guests: CollectionConfig = {
           if (parseCookie(cookie, `${payload.config.cookiePrefix}-token`)) return { user: null }
           const token = readGuestToken(parseCookie(cookie, GUEST_COOKIE))
           if (!token) return { user: null }
-          const guest = (await payload.findByID({
+          const guest = await payload.findByID({
             collection: 'guests',
             id: token.id,
             depth: 0,
             overrideAccess: true,
             disableErrors: true,
-          })) as any
-          if (!guest || codeFingerprint(guest.code) !== token.fingerprint) return { user: null }
-          return { user: { ...guest, collection: 'guests', _strategy: 'guest-code' } as any }
+          })
+          if (!guest || codeFingerprint(guest.code ?? '') !== token.fingerprint) return { user: null }
+          return { user: { ...guest, collection: 'guests', _strategy: 'guest-code' } }
         },
       },
     ],
@@ -147,8 +151,10 @@ export const Guests: CollectionConfig = {
     create: isAdmin,
     delete: isAdmin,
     // A guest can only ever see and edit their own record (and only the RSVP fields; see field access below).
-    read: ({ req }) => (isAdminUser(req.user) ? true : isGuestUser(req.user) ? { id: { equals: req.user!.id } } : false),
-    update: ({ req }) => (isAdminUser(req.user) ? true : isGuestUser(req.user) ? { id: { equals: req.user!.id } } : false),
+    read: ({ req }) =>
+      isAdminUser(req.user) ? true : isGuestUser(req.user) ? { id: { equals: req.user!.id } } : false,
+    update: ({ req }) =>
+      isAdminUser(req.user) ? true : isGuestUser(req.user) ? { id: { equals: req.user!.id } } : false,
   },
   hooks: {
     beforeValidate: [
@@ -164,7 +170,7 @@ export const Guests: CollectionConfig = {
       ({ data, req }) => {
         // Keep RSVP answers sane: seats can't exceed what was offered.
         if (isGuestUser(req.user) && (data.rsvp || data.rsvpCount !== undefined)) {
-          const max = Number((req.user as any).partySize) || 1
+          const max = Number(req.user.partySize) || 1
           if (data.rsvp === 'no') data.rsvpCount = 0
           else if (data.rsvp === 'yes') data.rsvpCount = Math.min(max, Math.max(1, Number(data.rsvpCount) || 1))
         }
@@ -173,7 +179,13 @@ export const Guests: CollectionConfig = {
     ],
   },
   fields: [
-    { name: 'name', type: 'text', required: true, label: 'Guest or family name', access: { update: ({ req }) => isAdminUser(req.user) } },
+    {
+      name: 'name',
+      type: 'text',
+      required: true,
+      label: 'Guest or family name',
+      access: { update: ({ req }) => isAdminUser(req.user) },
+    },
     {
       name: 'invite',
       type: 'ui',

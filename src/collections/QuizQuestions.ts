@@ -28,9 +28,9 @@ export const QuizQuestions: CollectionConfig = {
       labels: { singular: 'Answer', plural: 'Answers' },
       admin: { description: 'Add 2–4 answers and tick exactly one as correct.' },
       validate: (value: unknown) => {
-        const rows = Array.isArray(value) ? value : []
+        const rows = (Array.isArray(value) ? value : []) as { isCorrect?: boolean | null }[]
         if (rows.length < 2) return 'Add at least two answers.'
-        return rows.filter((r: any) => r?.isCorrect).length === 1 || 'Tick exactly one correct answer.'
+        return rows.filter((r) => r?.isCorrect).length === 1 || 'Tick exactly one correct answer.'
       },
       fields: [
         { name: 'text', type: 'text', required: true, maxLength: 100 },

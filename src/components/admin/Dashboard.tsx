@@ -24,9 +24,9 @@ export const Dashboard = async ({ user }: { user?: { collection?: string } | nul
     payload.count({ collection: 'guests', where: { unlocked: { equals: true } } }),
     payload.count({ collection: 'quiz-questions' }),
   ])
-  const headcount = attending.docs.reduce((n: number, g: any) => n + (g.rsvpCount || 0), 0)
+  const headcount = attending.docs.reduce((n, g) => n + (g.rsvpCount ?? 0), 0)
   const pending = guests.totalDocs - attending.docs.length - declined.totalDocs
-  const e = event as any
+  const e = event
 
   const stats: [string, number, string?][] = [
     ['Invitations', guests.totalDocs],
@@ -69,7 +69,9 @@ export const Dashboard = async ({ user }: { user?: { collection?: string } | nul
         <span style={{ textDecoration: 'underline' }}>Change in Wedding settings</span>
       </a>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(140px, 100%), 1fr))', gap: 12 }}>
+      <div
+        style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(140px, 100%), 1fr))', gap: 12 }}
+      >
         {stats.map(([label, value, hint]) => (
           <div key={label} style={card}>
             <div style={{ fontSize: 28, fontWeight: 700, lineHeight: 1.1 }}>{value}</div>

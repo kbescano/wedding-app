@@ -1,8 +1,9 @@
 'use client'
+import type { ReactNode } from 'react'
 import { motion } from 'framer-motion'
 
 /** Each route fades and rises in. */
-export default function Page({ children, className = '' }) {
+export default function Page({ children, className = '' }: { children: ReactNode; className?: string }) {
   return (
     <motion.main
       className={`page ${className}`}

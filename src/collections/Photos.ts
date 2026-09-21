@@ -49,8 +49,8 @@ export const Photos: CollectionConfig = {
           if (totalDocs >= PER_GUEST_LIMIT) {
             throw new APIError('You’ve reached the upload limit. Thank you for sharing so many!', 429)
           }
-          data.author = (req.user as any).name
-          data.owner = req.user!.id
+          data.author = req.user.name
+          data.owner = req.user.id
         } else {
           data.author = 'The Couple'
           data.owner = null

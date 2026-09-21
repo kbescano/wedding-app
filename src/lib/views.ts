@@ -1,3 +1,5 @@
+import type { Event as WeddingEvent, Guest, Message, Photo } from '../payload-types'
+
 /**
  * Plain-data shapes the UI works with. Pure functions (no server-only imports),
  * so both server components and browser code can build them from Payload documents.
@@ -13,7 +15,7 @@ export type GuestView = {
   unlocked: boolean
 }
 
-export const guestView = (g: any): GuestView => ({
+export const guestView = (g: Guest): GuestView => ({
   id: g.id,
   name: g.name,
   party_size: g.partySize ?? 1,
@@ -24,51 +26,55 @@ export const guestView = (g: any): GuestView => ({
   unlocked: !!g.unlocked,
 })
 
-export const photoView = (p: any, mine: boolean) => ({
+/** Photos and messages point at their owner either by id or (when populated) as a full guest. */
+export const ownerId = (owner: number | Guest | null | undefined): number | null =>
+  owner == null ? null : typeof owner === 'object' ? owner.id : owner
+
+export const photoView = (p: Photo, mine: boolean) => ({
   id: p.id,
-  url: p.url as string,
-  thumb: (p.sizes?.thumbnail?.url || p.url) as string,
-  caption: (p.caption ?? '') as string,
-  author: (p.author ?? 'A guest') as string,
-  created_at: p.createdAt as string,
+  url: p.url ?? '',
+  thumb: p.sizes?.thumbnail?.url || p.url || '',
+  caption: p.caption ?? '',
+  author: p.author ?? 'A guest',
+  created_at: p.createdAt,
   mine,
 })
 
-export const messageView = (m: any, mine: boolean) => ({
+export const messageView = (m: Message, mine: boolean) => ({
   id: m.id,
-  author: (m.author ?? 'A guest') as string,
-  body: m.body as string,
+  author: m.author ?? 'A guest',
+  body: m.body,
   private: !!m.private,
-  created_at: m.createdAt as string,
+  created_at: m.createdAt,
   mine,
 })
 
 export type EventView = ReturnType<typeof eventView>
 
 /** Payload's array-of-objects fields flattened to the simple shapes the pages use. */
-export const eventView = (e: any) => ({
-  partner1: e.partner1 as string,
-  partner2: e.partner2 as string,
-  date: e.date as string,
-  time: (e.time ?? '') as string,
-  venue: (e.venue ?? '') as string,
-  address: (e.address ?? '') as string,
-  mapUrl: (e.mapUrl ?? '') as string,
-  note: (e.note ?? '') as string,
-  dressCode: (e.dressCode ?? '') as string,
-  dressNote: (e.dressNote ?? '') as string,
-  swatches: ((e.swatches ?? []) as any[]).map((s) => s.color).filter(Boolean) as string[],
-  mealOptions: ((e.mealOptions ?? []) as any[]).map((m) => m.option).filter(Boolean) as string[],
-  rsvpDeadline: (e.rsvpDeadline ?? '') as string,
+export const eventView = (e: WeddingEvent) => ({
+  partner1: e.partner1,
+  partner2: e.partner2,
+  date: e.date,
+  time: e.time ?? '',
+  venue: e.venue ?? '',
+  address: e.address ?? '',
+  mapUrl: e.mapUrl ?? '',
+  note: e.note ?? '',
+  dressCode: e.dressCode ?? '',
+  dressNote: e.dressNote ?? '',
+  swatches: (e.swatches ?? []).map((s) => s.color).filter(Boolean),
+  mealOptions: (e.mealOptions ?? []).map((m) => m.option).filter(Boolean),
+  rsvpDeadline: e.rsvpDeadline ?? '',
   seatingPublished: !!e.seatingPublished,
-  schedule: ((e.schedule ?? []) as any[]).map((s) => ({ time: (s.time ?? '') as string, title: s.title as string, detail: (s.detail ?? '') as string })),
+  schedule: (e.schedule ?? []).map((s) => ({ time: s.time ?? '', title: s.title, detail: s.detail ?? '' })),
 })
 
 /** What the sealed screen may show: names and date only. */
-export const publicInfo = (e: any) => ({
-  partner1: e.partner1 as string,
-  partner2: e.partner2 as string,
-  date: e.date as string,
+export const publicInfo = (e: WeddingEvent) => ({
+  partner1: e.partner1,
+  partner2: e.partner2,
+  date: e.date,
   openAccess: !!e.openAccess,
 })
 
@@ -95,3 +101,31 @@ export const placeholderEvent = (pub: { partner1: string; partner2: string; date
     { time: '20:30', title: 'Celebration', detail: 'Details revealed after you sign in.' },
   ],
 })
+
+/* ---- Shared shapes used by both the server (data.ts) and the browser (views) ---- */
+
+export type PhotoView = ReturnType<typeof photoView>
+export type MessageView = ReturnType<typeof messageView>
+export type PublicInfo = ReturnType<typeof publicInfo>
+export type Role = 'admin' | 'guest' | null
+
+export type SeatingTable = { label: string; guests: string[] }
+export type SeatingData = { published: boolean; tables: SeatingTable[]; mine: string | null }
+
+export type LeaderRow = { rank: number; id: number; name: string; score: number; answered: number }
+export type QuizStatus = 'off' | 'live' | 'ended'
+export type QuizQuestion = { id: number; question: string; options: string[] }
+export type QuizAnswer = { choice: number; correct: boolean; correctIndex: number }
+export type AnswerResult = { error: string } | { choice: number; correct: boolean; correctIndex: number; score: number }
+export type QuizState = {
+  status: QuizStatus
+  eligible: boolean
+  isAdmin: boolean
+  /** True for signed-out visitors (only possible while Open access is on). */
+  public: boolean
+  total: number
+  leaderboard: LeaderRow[]
+  questions: QuizQuestion[]
+  answers: Record<string, QuizAnswer>
+  me: { score: number; answered: number; rank: number | null } | null
+}

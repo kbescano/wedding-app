@@ -1,19 +1,23 @@
 'use client'
-import { createContext, useCallback, useContext, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { Check, AlertCircle } from 'lucide-react';
+import { createContext, useCallback, useContext, useState, type ReactNode } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { Check, AlertCircle } from 'lucide-react'
 
-const ToastContext = createContext(() => {});
-export const useToast = () => useContext(ToastContext);
+type ToastType = 'ok' | 'error'
+type ToastItem = { id: string; message: string; type: ToastType }
+export type ToastFn = (message: string, type?: ToastType) => void
 
-export function ToastProvider({ children }) {
-  const [items, setItems] = useState([]);
+const ToastContext = createContext<ToastFn>(() => {})
+export const useToast = (): ToastFn => useContext(ToastContext)
 
-  const toast = useCallback((message, type = 'ok') => {
-    const id = Math.random().toString(36).slice(2);
-    setItems((list) => [...list, { id, message, type }]);
-    setTimeout(() => setItems((list) => list.filter((t) => t.id !== id)), 3800);
-  }, []);
+export function ToastProvider({ children }: { children: ReactNode }) {
+  const [items, setItems] = useState<ToastItem[]>([])
+
+  const toast = useCallback<ToastFn>((message, type = 'ok') => {
+    const id = Math.random().toString(36).slice(2)
+    setItems((list) => [...list, { id, message, type }])
+    setTimeout(() => setItems((list) => list.filter((t) => t.id !== id)), 3800)
+  }, [])
 
   return (
     <ToastContext.Provider value={toast}>
@@ -37,5 +41,5 @@ export function ToastProvider({ children }) {
         </AnimatePresence>
       </div>
     </ToastContext.Provider>
-  );
+  )
 }

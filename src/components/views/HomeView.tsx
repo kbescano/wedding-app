@@ -1,21 +1,20 @@
 'use client'
-import { useEffect, useRef, useState } from 'react';
-import { AnimatePresence, motion, useScroll, useSpring, useTransform } from 'framer-motion';
-import { CalendarDays, CalendarPlus, ChevronDown, Minus, Navigation, Plus, Shirt, MapPin, Check } from 'lucide-react';
-import Page from '../Page.jsx';
-import Gate from '../Gate.jsx';
-import { Countdown, Petals, Reveal, Words } from '../Motion.jsx';
-import { useAuth } from '../AuthContext.jsx';
-import { useToast } from '../Toast.jsx';
-import { api } from '../../lib/client-api.js';
-import { guestView } from '../../lib/views';
-import { clock, downloadCalendar, longDate, parseDate, shortDate, weekday } from '../../lib/format.js';
+import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { AnimatePresence, motion, useScroll, useSpring } from 'framer-motion'
+import { CalendarDays, CalendarPlus, ChevronDown, Minus, Navigation, Plus, Shirt, MapPin, Check } from 'lucide-react'
+import Page from '../Page'
+import Gate from '../Gate'
+import { Countdown, Petals, Reveal, Words, ease } from '../Motion'
+import { useAuth } from '../AuthContext'
+import { useToast } from '../Toast'
+import { api, errorMessage } from '../../lib/client-api'
+import type { Guest } from '../../payload-types'
+import { guestView, type EventView, type GuestView } from '../../lib/views'
+import { clock, downloadCalendar, longDate, parseDate, shortDate, weekday } from '../../lib/format'
 
-const ease = [0.22, 1, 0.36, 1];
-
-function Hero({ event, guest }) {
-  const d = parseDate(event.date, event.time);
-  const month = d.toLocaleDateString('en-GB', { month: 'long' });
+function Hero({ event, guest }: { event: EventView; guest: GuestView | null }) {
+  const d = parseDate(event.date, event.time)
+  const month = d.toLocaleDateString('en-GB', { month: 'long' })
   return (
     <section className="hero">
       <div className="hero-glow" />
@@ -108,10 +107,10 @@ function Hero({ event, guest }) {
         </motion.a>
       </div>
     </section>
-  );
+  )
 }
 
-function Intro({ event }) {
+function Intro({ event }: { event: EventView }) {
   return (
     <section className="section intro">
       <Reveal>
@@ -124,13 +123,13 @@ function Intro({ event }) {
         <Countdown target={parseDate(event.date, event.time)} />
       </Reveal>
     </section>
-  );
+  )
 }
 
-function Details({ event }) {
+function Details({ event }: { event: EventView }) {
   const mapsHref =
     event.mapUrl ||
-    `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([event.venue, event.address].filter(Boolean).join(' '))}`;
+    `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([event.venue, event.address].filter(Boolean).join(' '))}`
   return (
     <section className="section details" id="the-day">
       <Reveal className="section-head">
@@ -139,7 +138,9 @@ function Details({ event }) {
       </Reveal>
       <div className="detail-grid">
         <Reveal className="detail-card" delay={0}>
-          <span className="detail-icon"><CalendarDays size={22} /></span>
+          <span className="detail-icon">
+            <CalendarDays size={22} />
+          </span>
           <h3>When</h3>
           <p className="detail-big">{longDate(event.date)}</p>
           <p className="muted">Ceremony begins at {clock(event.time)}</p>
@@ -148,7 +149,9 @@ function Details({ event }) {
           </button>
         </Reveal>
         <Reveal className="detail-card" delay={0.12}>
-          <span className="detail-icon"><MapPin size={22} /></span>
+          <span className="detail-icon">
+            <MapPin size={22} />
+          </span>
           <h3>Where</h3>
           <p className="detail-big">{event.venue}</p>
           <p className="muted">{event.address}</p>
@@ -157,7 +160,9 @@ function Details({ event }) {
           </a>
         </Reveal>
         <Reveal className="detail-card" delay={0.24}>
-          <span className="detail-icon"><Shirt size={22} /></span>
+          <span className="detail-icon">
+            <Shirt size={22} />
+          </span>
           <h3>Dress code</h3>
           <p className="detail-big">{event.dressCode}</p>
           <p className="muted">{event.dressNote}</p>
@@ -178,13 +183,13 @@ function Details({ event }) {
         </Reveal>
       </div>
     </section>
-  );
+  )
 }
 
-function Schedule({ event }) {
-  const ref = useRef(null);
-  const { scrollYProgress } = useScroll({ target: ref, offset: ['start 75%', 'end 55%'] });
-  const grow = useSpring(scrollYProgress, { stiffness: 120, damping: 24 });
+function Schedule({ event }: { event: EventView }) {
+  const ref = useRef<HTMLOListElement>(null)
+  const { scrollYProgress } = useScroll({ target: ref, offset: ['start 75%', 'end 55%'] })
+  const grow = useSpring(scrollYProgress, { stiffness: 120, damping: 24 })
   return (
     <section className="section schedule">
       <Reveal className="section-head">
@@ -219,61 +224,87 @@ function Schedule({ event }) {
         ))}
       </ol>
     </section>
-  );
+  )
 }
 
 function CheckMark() {
   return (
     <motion.svg viewBox="0 0 52 52" className="check-mark" aria-hidden>
       <motion.circle
-        cx="26" cy="26" r="23" fill="none" strokeWidth="2"
-        initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.8, ease }}
+        cx="26"
+        cy="26"
+        r="23"
+        fill="none"
+        strokeWidth="2"
+        initial={{ pathLength: 0 }}
+        animate={{ pathLength: 1 }}
+        transition={{ duration: 0.8, ease }}
       />
       <motion.path
-        d="M15 27l8 8 15-17" fill="none" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"
-        initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.5, delay: 0.6, ease }}
+        d="M15 27l8 8 15-17"
+        fill="none"
+        strokeWidth="3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        initial={{ pathLength: 0 }}
+        animate={{ pathLength: 1 }}
+        transition={{ duration: 0.5, delay: 0.6, ease }}
       />
     </motion.svg>
-  );
+  )
 }
 
-function Rsvp({ event }) {
-  const { role, guest, setGuest, openSignIn } = useAuth();
-  const toast = useToast();
-  const answered = guest && guest.rsvp !== 'pending';
-  const [editing, setEditing] = useState(false);
-  const [status, setStatus] = useState(guest?.rsvp === 'pending' ? null : guest?.rsvp || null);
-  const [count, setCount] = useState(guest?.rsvp_count || 1);
-  const [meal, setMeal] = useState(guest?.meal || '');
-  const [note, setNote] = useState(guest?.note || '');
-  const [saving, setSaving] = useState(false);
-  const max = guest?.party_size || 1;
+type Reply = 'yes' | 'no'
+const CHOICES: [Reply, string][] = [
+  ['yes', 'Joyfully accepts'],
+  ['no', 'Regretfully declines'],
+]
+const replyOf = (g: GuestView | null): Reply | null => (g?.rsvp === 'yes' || g?.rsvp === 'no' ? g.rsvp : null)
+
+function Rsvp({ event }: { event: EventView }) {
+  const { role, guest, setGuest, openSignIn } = useAuth()
+  const toast = useToast()
+  const answered = guest && guest.rsvp !== 'pending'
+  const [editing, setEditing] = useState(false)
+  const [status, setStatus] = useState<Reply | null>(replyOf(guest))
+  const [count, setCount] = useState(guest?.rsvp_count || 1)
+  const [meal, setMeal] = useState(guest?.meal || '')
+  const [note, setNote] = useState(guest?.note || '')
+  const [saving, setSaving] = useState(false)
+  const max = guest?.party_size || 1
 
   useEffect(() => {
-    if (!guest) return;
-    setStatus(guest.rsvp === 'pending' ? null : guest.rsvp);
-    setCount(guest.rsvp_count || 1);
-    setMeal(guest.meal || '');
-    setNote(guest.note || '');
-  }, [guest?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (!guest) return
+    setStatus(replyOf(guest))
+    setCount(guest.rsvp_count || 1)
+    setMeal(guest.meal || '')
+    setNote(guest.note || '')
+  }, [guest?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const submit = async (e) => {
-    e.preventDefault();
-    if (!status || saving) return;
-    setSaving(true);
+  const submit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    if (!status || saving || !guest) return
+    setSaving(true)
     try {
-      const res = await api.patch(`/api/guests/${guest.id}?depth=0`, { rsvp: status, rsvpCount: count, meal, note });
-      setGuest(guestView(res.doc));
-      setEditing(false);
-      toast(status === 'yes' ? 'Reply received. See you there!' : 'Reply received. Thank you for letting us know.');
+      const res = await api.patch<{ doc: Guest }>(`/api/guests/${guest.id}?depth=0`, {
+        rsvp: status,
+        rsvpCount: count,
+        meal,
+        note,
+      })
+      setGuest(guestView(res.doc))
+      setEditing(false)
+      toast(status === 'yes' ? 'Reply received. See you there!' : 'Reply received. Thank you for letting us know.')
     } catch (err) {
-      toast(err.message, 'error');
+      toast(errorMessage(err), 'error')
     } finally {
-      setSaving(false);
+      setSaving(false)
     }
-  };
+  }
 
-  const deadline = event.rsvpDeadline ? `Kindly reply by ${shortDate(event.rsvpDeadline)}.` : 'Kindly let us know if you can make it.';
+  const deadline = event.rsvpDeadline
+    ? `Kindly reply by ${shortDate(event.rsvpDeadline)}.`
+    : 'Kindly let us know if you can make it.'
 
   return (
     <section className="section rsvp on-dark" id="rsvp">
@@ -285,30 +316,37 @@ function Rsvp({ event }) {
 
       <Reveal className="rsvp-card" delay={0.1}>
         {role === 'admin' ? (
-          <p className="rsvp-note">You’re viewing as the couple. Guests reply here, and you’ll see their answers on your dashboard.</p>
+          <p className="rsvp-note">
+            You’re viewing as the couple. Guests reply here, and you’ll see their answers on your dashboard.
+          </p>
         ) : !role ? (
           <div className="rsvp-note">
             <p>Replies are for invited guests. Sign in with your invitation code to RSVP.</p>
-            <button className="btn btn-brass" onClick={openSignIn}>Sign in with code</button>
+            <button className="btn btn-brass" onClick={openSignIn}>
+              Sign in with code
+            </button>
           </div>
         ) : answered && !editing ? (
           <motion.div className="rsvp-done" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
             <CheckMark />
-            <h3>{guest.rsvp === 'yes' ? `We’ll see you there, ${guest.name.split(' ')[0]}!` : `We’ll miss you, ${guest.name.split(' ')[0]}.`}</h3>
+            <h3>
+              {guest.rsvp === 'yes'
+                ? `We’ll see you there, ${guest.name.split(' ')[0]}!`
+                : `We’ll miss you, ${guest.name.split(' ')[0]}.`}
+            </h3>
             <p className="muted-light">
               {guest.rsvp === 'yes'
                 ? `${guest.rsvp_count} ${guest.rsvp_count === 1 ? 'seat' : 'seats'} reserved${guest.meal ? ` · ${guest.meal}` : ''}`
                 : 'Thank you for letting us know.'}
             </p>
-            <button className="btn btn-light-ghost" onClick={() => setEditing(true)}>Change my reply</button>
+            <button className="btn btn-light-ghost" onClick={() => setEditing(true)}>
+              Change my reply
+            </button>
           </motion.div>
         ) : (
           <form onSubmit={submit} className="rsvp-form">
             <div className="choice-row" role="radiogroup" aria-label="Your reply">
-              {[
-                ['yes', 'Joyfully accepts'],
-                ['no', 'Regretfully declines'],
-              ].map(([val, label]) => (
+              {CHOICES.map(([val, label]) => (
                 <button
                   type="button"
                   key={val}
@@ -317,7 +355,13 @@ function Rsvp({ event }) {
                   className={`choice ${status === val ? 'is-on' : ''}`}
                   onClick={() => setStatus(val)}
                 >
-                  {status === val && <motion.i layoutId="choice-bg" className="choice-bg" transition={{ type: 'spring', stiffness: 380, damping: 32 }} />}
+                  {status === val && (
+                    <motion.i
+                      layoutId="choice-bg"
+                      className="choice-bg"
+                      transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                    />
+                  )}
                   <span className="choice-label">{label}</span>
                   {status === val && <Check size={16} className="choice-check" />}
                 </button>
@@ -338,9 +382,25 @@ function Rsvp({ event }) {
                     <div className="field">
                       <span className="field-label">How many will attend?</span>
                       <div className="stepper">
-                        <button type="button" onClick={() => setCount((c) => Math.max(1, c - 1))} aria-label="Fewer"><Minus size={16} /></button>
-                        <output><AnimatePresence mode="popLayout" initial={false}><motion.b key={count} initial={{ y: 12, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -12, opacity: 0 }} transition={{ duration: 0.2 }}>{count}</motion.b></AnimatePresence></output>
-                        <button type="button" onClick={() => setCount((c) => Math.min(max, c + 1))} aria-label="More"><Plus size={16} /></button>
+                        <button type="button" onClick={() => setCount((c) => Math.max(1, c - 1))} aria-label="Fewer">
+                          <Minus size={16} />
+                        </button>
+                        <output>
+                          <AnimatePresence mode="popLayout" initial={false}>
+                            <motion.b
+                              key={count}
+                              initial={{ y: 12, opacity: 0 }}
+                              animate={{ y: 0, opacity: 1 }}
+                              exit={{ y: -12, opacity: 0 }}
+                              transition={{ duration: 0.2 }}
+                            >
+                              {count}
+                            </motion.b>
+                          </AnimatePresence>
+                        </output>
+                        <button type="button" onClick={() => setCount((c) => Math.min(max, c + 1))} aria-label="More">
+                          <Plus size={16} />
+                        </button>
                         <span className="muted-light">of {max} seats</span>
                       </div>
                     </div>
@@ -350,7 +410,9 @@ function Rsvp({ event }) {
                       <span className="field-label">Meal preference</span>
                       <select value={meal} onChange={(e) => setMeal(e.target.value)}>
                         <option value="">No preference</option>
-                        {event.mealOptions.map((m) => <option key={m}>{m}</option>)}
+                        {event.mealOptions.map((m) => (
+                          <option key={m}>{m}</option>
+                        ))}
                       </select>
                     </label>
                   )}
@@ -360,36 +422,48 @@ function Rsvp({ event }) {
 
             {status && (
               <motion.label className="field" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                <span className="field-label">{status === 'yes' ? 'Allergies or anything else we should know?' : 'A note for the couple (optional)'}</span>
+                <span className="field-label">
+                  {status === 'yes' ? 'Allergies or anything else we should know?' : 'A note for the couple (optional)'}
+                </span>
                 <textarea rows={3} maxLength={300} value={note} onChange={(e) => setNote(e.target.value)} />
               </motion.label>
             )}
 
             <div className="rsvp-actions">
-              <button className="btn btn-brass" disabled={!status || saving}>{saving ? 'Sending…' : 'Send my reply'}</button>
-              {answered && <button type="button" className="btn btn-light-ghost" onClick={() => setEditing(false)}>Cancel</button>}
+              <button className="btn btn-brass" disabled={!status || saving}>
+                {saving ? 'Sending…' : 'Send my reply'}
+              </button>
+              {answered && (
+                <button type="button" className="btn btn-light-ghost" onClick={() => setEditing(false)}>
+                  Cancel
+                </button>
+              )}
             </div>
           </form>
         )}
       </Reveal>
     </section>
-  );
+  )
 }
 
-function Footer({ event }) {
+function Footer({ event }: { event: EventView }) {
   return (
     <footer className="site-footer">
       <Reveal>
-        <p className="foot-names">{event.partner1} <em>&amp;</em> {event.partner2}</p>
-        <p className="muted">{shortDate(event.date)} · {event.venue}</p>
+        <p className="foot-names">
+          {event.partner1} <em>&amp;</em> {event.partner2}
+        </p>
+        <p className="muted">
+          {shortDate(event.date)} · {event.venue}
+        </p>
         <p className="foot-love">With love and gratitude</p>
       </Reveal>
     </footer>
-  );
+  )
 }
 
 export default function HomeView() {
-  const { event, guest } = useAuth();
+  const { event, guest } = useAuth()
   return (
     <Page className="home">
       <Gate section="home">
@@ -401,5 +475,5 @@ export default function HomeView() {
         <Footer event={event} />
       </Gate>
     </Page>
-  );
+  )
 }

@@ -1,51 +1,65 @@
 'use client'
-import { useEffect, useRef, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { useSearchParams } from 'next/navigation';
-import { ArrowRight, Lock, X } from 'lucide-react';
-import { useAuth } from './AuthContext.jsx';
-import { useToast } from './Toast.jsx';
-import { initials } from '../lib/format.js';
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { useSearchParams } from 'next/navigation'
+import { ArrowRight, Lock, X } from 'lucide-react'
+import { useAuth } from './AuthContext'
+import { useToast } from './Toast'
+import { initials } from '../lib/format'
 
-const COPY = {
+export type Section = 'home' | 'memories' | 'messages' | 'games' | 'seating'
+
+const COPY: Record<Section, [string, string, string]> = {
   home: ['By invitation only', 'Your invitation is sealed', 'Enter the code from your invitation to break the seal.'],
   memories: ['Guests only', 'Memories are for guests', 'Sign in with your invitation code to see and share photos.'],
-  messages: ['Guests only', 'Leave a message for the couple', 'Sign in with your invitation code to read and write messages.'],
+  messages: [
+    'Guests only',
+    'Leave a message for the couple',
+    'Sign in with your invitation code to read and write messages.',
+  ],
   games: ['Guests only', 'Games are for guests', 'Sign in with your invitation code to join the quiz.'],
   seating: ['Guests only', 'Find your seat', 'Sign in with your invitation code to see where you’re sitting.'],
-};
+}
 
-function formatTyped(v) {
-  const clean = v.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8);
-  return clean.length > 4 ? `${clean.slice(0, 4)}-${clean.slice(4)}` : clean;
+function formatTyped(v: string) {
+  const clean = v
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, '')
+    .slice(0, 8)
+  return clean.length > 4 ? `${clean.slice(0, 4)}-${clean.slice(4)}` : clean
 }
 
 /** Invitation-code field + button. Shared by the sealed-page card and the sign-in modal. */
-export function CodeForm({ onDone, autoFocus = false }) {
-  const { login, loginNotice, setLoginNotice } = useAuth();
-  const params = useSearchParams();
-  const [code, setCode] = useState(() => formatTyped(params.get('code') || ''));
-  const [error, setError] = useState('');
-  const [busy, setBusy] = useState(false);
-  const [shake, setShake] = useState(0);
+type CodeFormProps = {
+  onDone?: (res: { guest: { id: number; name: string } }) => void
+  autoFocus?: boolean
+}
 
-  const submit = async (e) => {
-    e.preventDefault();
-    if (busy) return;
-    setBusy(true);
-    setError('');
-    setLoginNotice('');
+export function CodeForm({ onDone, autoFocus = false }: CodeFormProps) {
+  const { login, loginNotice, setLoginNotice } = useAuth()
+  const params = useSearchParams()
+  const [code, setCode] = useState(() => formatTyped(params.get('code') || ''))
+  const [error, setError] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [shake, setShake] = useState(0)
+
+  const submit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    if (busy) return
+    setBusy(true)
+    setError('')
+    setLoginNotice('')
     try {
-      const res = await login(code);
-      onDone?.(res);
+      const res = await login(code)
+      onDone?.(res)
     } catch (err) {
-      setError(err.message);
-      setShake((n) => n + 1);
-      setBusy(false);
+      setError((err as Error).message)
+      setShake((n) => n + 1)
+      setBusy(false)
     }
-  };
+  }
 
-  const message = error || loginNotice;
+  const message = error || loginNotice
 
   return (
     <>
@@ -56,7 +70,9 @@ export function CodeForm({ onDone, autoFocus = false }) {
         animate={shake ? { x: [0, -10, 9, -6, 4, 0] } : undefined}
         transition={{ duration: 0.45 }}
       >
-        <label className="sr-only" htmlFor="invite-code">Invitation code</label>
+        <label className="sr-only" htmlFor="invite-code">
+          Invitation code
+        </label>
         <input
           id="invite-code"
           className="code-input"
@@ -88,11 +104,11 @@ export function CodeForm({ onDone, autoFocus = false }) {
         )}
       </AnimatePresence>
     </>
-  );
+  )
 }
 
 function Seal() {
-  const { pub } = useAuth();
+  const { pub } = useAuth()
   return (
     <motion.div
       className="seal"
@@ -102,11 +118,11 @@ function Seal() {
     >
       <span>{initials(pub?.partner1, pub?.partner2) || '&'}</span>
     </motion.div>
-  );
+  )
 }
 
-function LockCard({ section }) {
-  const [eyebrow, title, blurb] = COPY[section] || COPY.home;
+function LockCard({ section }: { section: Section }) {
+  const [eyebrow, title, blurb] = COPY[section] || COPY.home
   return (
     <motion.div
       className="lockcard"
@@ -124,10 +140,12 @@ function LockCard({ section }) {
       <CodeForm />
       <p className="lock-foot">
         <Lock size={12} /> Your code was sent by the couple.{' '}
-        <a href="/admin" className="text-link">Couple sign-in</a>
+        <a href="/admin" className="text-link">
+          Couple sign-in
+        </a>
       </p>
     </motion.div>
-  );
+  )
 }
 
 /**
@@ -135,20 +153,26 @@ function LockCard({ section }) {
  * but need a code to add photos, write messages, RSVP or play.
  */
 export function SignInModal() {
-  const { signInOpen, closeSignIn, role } = useAuth();
-  const toast = useToast();
+  const { signInOpen, closeSignIn, role } = useAuth()
+  const toast = useToast()
 
   useEffect(() => {
-    if (!signInOpen) return;
-    const onKey = (e) => e.key === 'Escape' && closeSignIn();
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [signInOpen, closeSignIn]);
+    if (!signInOpen) return
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && closeSignIn()
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [signInOpen, closeSignIn])
 
   return (
     <AnimatePresence>
       {signInOpen && !role && (
-        <motion.div className="signin-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={closeSignIn}>
+        <motion.div
+          className="signin-backdrop"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={closeSignIn}
+        >
           <motion.div
             className="lockcard"
             role="dialog"
@@ -160,46 +184,50 @@ export function SignInModal() {
             onClick={(e) => e.stopPropagation()}
           >
             <Seal />
-            <button className="icon-btn lock-close" onClick={closeSignIn} aria-label="Close"><X size={18} /></button>
+            <button className="icon-btn lock-close" onClick={closeSignIn} aria-label="Close">
+              <X size={18} />
+            </button>
             <p className="eyebrow">Invited guests</p>
             <h2 className="lock-title">Sign in with your code</h2>
-            <p className="lock-blurb">Add photos, write messages, RSVP and play the quiz with your personal invitation code.</p>
+            <p className="lock-blurb">
+              Add photos, write messages, RSVP and play the quiz with your personal invitation code.
+            </p>
             <CodeForm
               autoFocus
               onDone={(res) => {
-                closeSignIn();
-                toast(`Welcome, ${res.guest.name}`);
+                closeSignIn()
+                toast(`Welcome, ${res.guest.name}`)
               }}
             />
           </motion.div>
         </motion.div>
       )}
     </AnimatePresence>
-  );
+  )
 }
 
 /**
  * Wraps a page. Visitors who can't view yet see it blurred with placeholder content only;
  * once they sign in (or the couple turn on open access) the blur dissolves in place.
  */
-export default function Gate({ section = 'home', children }) {
-  const { canView, unlockedAt } = useAuth();
-  const locked = !canView;
-  const recent = useRef(unlockedAt && Date.now() - unlockedAt < 4000).current;
-  const [state, setState] = useState(locked || recent ? 'locked' : 'open');
+export default function Gate({ section = 'home', children }: { section?: Section; children: ReactNode }) {
+  const { canView, unlockedAt } = useAuth()
+  const locked = !canView
+  const recent = useRef(unlockedAt && Date.now() - unlockedAt < 4000).current
+  const [state, setState] = useState(locked || recent ? 'locked' : 'open')
 
   useEffect(() => {
-    if (locked) return setState('locked');
-    if (state !== 'locked') return;
-    const id = requestAnimationFrame(() => requestAnimationFrame(() => setState('opening')));
-    return () => cancelAnimationFrame(id);
-  }, [locked]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (locked) return setState('locked')
+    if (state !== 'locked') return
+    const id = requestAnimationFrame(() => requestAnimationFrame(() => setState('opening')))
+    return () => cancelAnimationFrame(id)
+  }, [locked]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    if (state !== 'opening') return;
-    const t = setTimeout(() => setState('open'), 1900);
-    return () => clearTimeout(t);
-  }, [state]);
+    if (state !== 'opening') return
+    const t = setTimeout(() => setState('open'), 1900)
+    return () => clearTimeout(t)
+  }, [state])
 
   return (
     <>
@@ -214,5 +242,5 @@ export default function Gate({ section = 'home', children }) {
         )}
       </AnimatePresence>
     </>
-  );
+  )
 }

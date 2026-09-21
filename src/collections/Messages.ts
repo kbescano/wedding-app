@@ -30,8 +30,8 @@ export const Messages: CollectionConfig = {
       ({ data, req, operation }) => {
         if (operation !== 'create') return data
         if (!isGuestUser(req.user)) throw new APIError('Only invited guests can leave messages.', 403)
-        data.author = (req.user as any).name
-        data.owner = req.user!.id
+        data.author = req.user.name
+        data.owner = req.user.id
         return data
       },
     ],
@@ -45,6 +45,12 @@ export const Messages: CollectionConfig = {
       label: 'Private (only the couple can read it)',
     },
     { name: 'author', type: 'text', label: 'Message by', admin: { readOnly: true, position: 'sidebar' } },
-    { name: 'owner', type: 'relationship', relationTo: 'guests', maxDepth: 0, admin: { readOnly: true, position: 'sidebar' } },
+    {
+      name: 'owner',
+      type: 'relationship',
+      relationTo: 'guests',
+      maxDepth: 0,
+      admin: { readOnly: true, position: 'sidebar' },
+    },
   ],
 }

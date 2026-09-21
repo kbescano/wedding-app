@@ -1,14 +1,21 @@
 'use client'
-import { useEffect, useMemo, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { useEffect, useMemo, useState, type ElementType, type ReactNode } from 'react'
+import { AnimatePresence, motion, type HTMLMotionProps } from 'framer-motion'
 
-const ease = [0.22, 1, 0.36, 1];
+/** The easing used across the site (a smooth "ease-out expo"). */
+export const ease: [number, number, number, number] = [0.22, 1, 0.36, 1]
+
+type RevealProps = Omit<HTMLMotionProps<'div'>, 'children' | 'className'> & {
+  children: ReactNode
+  delay?: number
+  y?: number
+  className?: string
+}
 
 /** Fade + rise when scrolled into view. */
-export function Reveal({ children, delay = 0, y = 28, className = '', as = 'div', ...rest }) {
-  const Tag = motion[as];
+export function Reveal({ children, delay = 0, y = 28, className = '', ...rest }: RevealProps) {
   return (
-    <Tag
+    <motion.div
       className={className}
       initial={{ opacity: 0, y }}
       whileInView={{ opacity: 1, y: 0 }}
@@ -17,15 +24,18 @@ export function Reveal({ children, delay = 0, y = 28, className = '', as = 'div'
       {...rest}
     >
       {children}
-    </Tag>
-  );
+    </motion.div>
+  )
 }
 
+type WordsProps = { text: string; className?: string; delay?: number; stagger?: number; as?: ElementType }
+
 /** Words slide up out of a mask, one after another. */
-export function Words({ text, className = '', delay = 0, stagger = 0.1, as: Tag = 'span' }) {
+export function Words({ text, className = '', delay = 0, stagger = 0.1, as: Tag = 'span' }: WordsProps) {
+  const words = text.split(' ')
   return (
     <Tag className={className} aria-label={text}>
-      {text.split(' ').map((w, i) => (
+      {words.map((w, i) => (
         <span className="word-mask" key={i} aria-hidden="true">
           <motion.span
             className="word"
@@ -35,22 +45,23 @@ export function Words({ text, className = '', delay = 0, stagger = 0.1, as: Tag 
           >
             {w}
           </motion.span>
-          {i < text.split(' ').length - 1 ? ' ' : ''}
+          {i < words.length - 1 ? ' ' : ''}
         </span>
       ))}
     </Tag>
-  );
+  )
 }
 
 /** Slow drifting petals. Pure CSS animation, hidden for reduced motion. */
-export function Petals({ count = 16 }) {
+export function Petals({ count = 16 }: { count?: number }) {
   const petals = useMemo(
     () =>
       Array.from({ length: count }, (_, i) => {
-        const r = (n) => {
-          const x = Math.sin((i + 1) * 9301 + n * 49297) * 233280;
-          return x - Math.floor(x);
-        };
+        // Deterministic pseudo-random values, so server and client render the same petals.
+        const r = (n: number) => {
+          const x = Math.sin((i + 1) * 9301 + n * 49297) * 233280
+          return x - Math.floor(x)
+        }
         return {
           left: `${Math.round(r(1) * 100)}%`,
           size: 8 + Math.round(r(2) * 12),
@@ -58,28 +69,37 @@ export function Petals({ count = 16 }) {
           delay: -r(4) * 26,
           sway: 3 + r(5) * 4,
           tone: i % 3,
-        };
+        }
       }),
     [count],
-  );
+  )
   return (
     <div className="petals" aria-hidden="true">
       {petals.map((p, i) => (
-        <span key={i} className="petal-fall" style={{ left: p.left, animationDuration: `${p.dur}s`, animationDelay: `${p.delay}s` }}>
-          <i className={`petal tone-${p.tone}`} style={{ width: p.size, height: p.size, animationDuration: `${p.sway}s` }} />
+        <span
+          key={i}
+          className="petal-fall"
+          style={{ left: p.left, animationDuration: `${p.dur}s`, animationDelay: `${p.delay}s` }}
+        >
+          <i
+            className={`petal tone-${p.tone}`}
+            style={{ width: p.size, height: p.size, animationDuration: `${p.sway}s` }}
+          />
         </span>
       ))}
     </div>
-  );
+  )
 }
 
-function Digit({ value }) {
+function Digit({ value }: { value: string }) {
   return (
     <span className="digit">
       <AnimatePresence mode="popLayout" initial={false}>
         <motion.span
           key={value}
           className="digit-face"
+          // The server renders the time it rendered; the browser hydrates a moment later. The next tick corrects it.
+          suppressHydrationWarning
           initial={{ y: '-70%', opacity: 0, rotateX: 60 }}
           animate={{ y: 0, opacity: 1, rotateX: 0 }}
           exit={{ y: '70%', opacity: 0, rotateX: -60 }}
@@ -89,51 +109,54 @@ function Digit({ value }) {
         </motion.span>
       </AnimatePresence>
     </span>
-  );
+  )
 }
 
-export function Countdown({ target }) {
-  const [now, setNow] = useState(Date.now());
+export function Countdown({ target }: { target: Date }) {
+  const [now, setNow] = useState(Date.now())
   useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(id);
-  }, []);
-  const diff = Math.max(0, target.getTime() - now);
-  const units = [
+    const id = setInterval(() => setNow(Date.now()), 1000)
+    return () => clearInterval(id)
+  }, [])
+  const diff = Math.max(0, target.getTime() - now)
+  const units: [string, number][] = [
     ['Days', Math.floor(diff / 86400000)],
     ['Hours', Math.floor(diff / 3600000) % 24],
     ['Minutes', Math.floor(diff / 60000) % 60],
     ['Seconds', Math.floor(diff / 1000) % 60],
-  ];
+  ]
   return (
     <div className="countdown" role="timer" aria-label="Time until the wedding">
       {units.map(([label, n]) => (
         <div className="count-unit" key={label}>
           <div className="count-num">
-            {String(n).padStart(label === 'Days' ? 2 : 2, '0').split('').map((d, i) => (
-              <Digit key={`${label}-${i}`} value={d} />
-            ))}
+            {String(n)
+              .padStart(2, '0')
+              .split('')
+              .map((d, i) => (
+                <Digit key={`${label}-${i}`} value={d} />
+              ))}
           </div>
           <span className="count-label">{label}</span>
         </div>
       ))}
     </div>
-  );
+  )
 }
 
 /** Numbers that count up when shown. */
-export function CountUp({ to, duration = 1.1 }) {
-  const [n, setN] = useState(0);
+export function CountUp({ to, duration = 1.1 }: { to: number; duration?: number }) {
+  const [n, setN] = useState(0)
   useEffect(() => {
-    let raf;
-    const start = performance.now();
-    const tick = (t) => {
-      const p = Math.min(1, (t - start) / (duration * 1000));
-      setN(Math.round(to * (1 - Math.pow(1 - p, 3))));
-      if (p < 1) raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [to, duration]);
-  return <>{n}</>;
+    let raf = 0
+    const start = performance.now()
+    const tick = (t: number) => {
+      const p = Math.min(1, (t - start) / (duration * 1000))
+      setN(Math.round(to * (1 - Math.pow(1 - p, 3))))
+      if (p < 1) raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [to, duration])
+  return <>{n}</>
 }

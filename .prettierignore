@@ -1,0 +1,8 @@
+_legacy-express
+node_modules
+.next
+src/payload-types.ts
+src/migrations
+src/app/(payload)/admin/importMap.js
+package-lock.json
+src/app/(payload)

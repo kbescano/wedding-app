@@ -23,7 +23,12 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: `${e.partner1} & ${e.partner2} · Wedding`, robots: { index: false, follow: false } }
 }
 
-export const viewport: Viewport = { themeColor: '#1E3B2E', viewportFit: 'cover', width: 'device-width', initialScale: 1 }
+export const viewport: Viewport = {
+  themeColor: '#1E3B2E',
+  viewportFit: 'cover',
+  width: 'device-width',
+  initialScale: 1,
+}
 
 export default async function FrontendLayout({ children }: { children: React.ReactNode }) {
   const viewer = await getViewer()

@@ -41,11 +41,20 @@ export const GuestTools: React.FC = () => {
   return (
     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginBottom: 16 }}>
       <span style={{ fontSize: 13, color: 'var(--theme-elevation-600)' }}>Quiz tagging:</span>
-      <button type="button" style={btn} disabled={busy} onClick={() => run('attending', 'Everyone who RSVP’d yes is tagged.')}>
+      <button
+        type="button"
+        style={btn}
+        disabled={busy}
+        onClick={() => run('attending', 'Everyone who RSVP’d yes is tagged.')}
+      >
         Tag everyone attending
       </button>
-      <button type="button" style={btn} disabled={busy} onClick={() => run('all', 'Every guest is tagged.')}>Tag all guests</button>
-      <button type="button" style={btn} disabled={busy} onClick={() => run('none', 'All tags cleared.')}>Clear tags</button>
+      <button type="button" style={btn} disabled={busy} onClick={() => run('all', 'Every guest is tagged.')}>
+        Tag all guests
+      </button>
+      <button type="button" style={btn} disabled={busy} onClick={() => run('none', 'All tags cleared.')}>
+        Clear tags
+      </button>
     </div>
   )
 }

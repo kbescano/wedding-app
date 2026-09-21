@@ -6,6 +6,7 @@
 import zlib from 'node:zlib'
 import { getPayload } from 'payload'
 import config from './payload.config'
+import type { Guest } from './payload-types'
 
 /* ---- tiny PNG writer for placeholder "photos" (no image libraries needed) ---- */
 const crcOf = (buf: Buffer) => {
@@ -60,7 +61,15 @@ const scenes = [
 ]
 
 const guests = [
-  { name: 'Welcome Guest', partySize: 2, tableLabel: 'Table 1', rsvp: 'yes', rsvpCount: 2, unlocked: true, code: 'WELCOME7' },
+  {
+    name: 'Welcome Guest',
+    partySize: 2,
+    tableLabel: 'Table 1',
+    rsvp: 'yes',
+    rsvpCount: 2,
+    unlocked: true,
+    code: 'WELCOME7',
+  },
   { name: 'Amara Okafor', partySize: 2, tableLabel: 'Table 1', rsvp: 'yes', rsvpCount: 2, unlocked: true },
   { name: 'Daniel Reyes', partySize: 1, tableLabel: 'Table 2', rsvp: 'yes', rsvpCount: 1, unlocked: true },
   { name: 'The Whitfield Family', partySize: 4, tableLabel: 'Table 3', rsvp: 'yes', rsvpCount: 3, unlocked: false },
@@ -71,11 +80,31 @@ const guests = [
 ] as const
 
 const questions = [
-  { question: 'Where did the couple first meet?', options: ['At a friend’s party', 'On a train', 'At university', 'In a coffee shop'], correct: 3 },
-  { question: 'Who said “I love you” first?', options: ['Isabelle', 'Julian', 'At the same time', 'Nobody remembers'], correct: 1 },
-  { question: 'What was the first trip they took together?', options: ['A weekend by the sea', 'A city break in Lisbon', 'Camping in the mountains', 'A road trip'], correct: 0 },
-  { question: 'Which one of them is always late?', options: ['Isabelle', 'Julian', 'Both, equally', 'Neither, they’re early'], correct: 2 },
-  { question: 'What song do they say is “their song”?', options: ['Can’t Help Falling in Love', 'At Last', 'Thinking Out Loud', 'Just the Way You Are'], correct: 1 },
+  {
+    question: 'Where did the couple first meet?',
+    options: ['At a friend’s party', 'On a train', 'At university', 'In a coffee shop'],
+    correct: 3,
+  },
+  {
+    question: 'Who said “I love you” first?',
+    options: ['Isabelle', 'Julian', 'At the same time', 'Nobody remembers'],
+    correct: 1,
+  },
+  {
+    question: 'What was the first trip they took together?',
+    options: ['A weekend by the sea', 'A city break in Lisbon', 'Camping in the mountains', 'A road trip'],
+    correct: 0,
+  },
+  {
+    question: 'Which one of them is always late?',
+    options: ['Isabelle', 'Julian', 'Both, equally', 'Neither, they’re early'],
+    correct: 2,
+  },
+  {
+    question: 'What song do they say is “their song”?',
+    options: ['Can’t Help Falling in Love', 'At Last', 'Thinking Out Loud', 'Just the Way You Are'],
+    correct: 1,
+  },
 ]
 
 const payload = await getPayload({ config })
@@ -94,25 +123,36 @@ if ((await payload.count({ collection: 'users' })).totalDocs === 0) {
 
 await payload.updateGlobal({ slug: 'event', data: { openAccess: false, quizStatus: 'off', seatingPublished: false } })
 
-const created: any[] = []
+const created: Guest[] = []
 for (const g of guests) {
   created.push(await payload.create({ collection: 'guests', data: { ...g }, overrideAccess: true }))
 }
-const asGuest = (i: number) => ({ ...created[i], collection: 'guests' }) as any
+const asGuest = (i: number): Guest => created[i]
 
-for (const [n, [i, body]] of ([
-  [2, 'We’re counting down the days! Save us a dance, and please, no speeches longer than the cake.'],
-  [6, 'From the first coffee to the first dance. So happy for you both. All my love, always.'],
-  [1, 'Two of the kindest people we know. Here’s to a lifetime of Sunday mornings and long dinners.'],
-] as [number, string][]).entries()) {
+for (const [n, [i, body]] of (
+  [
+    [2, 'We’re counting down the days! Save us a dance, and please, no speeches longer than the cake.'],
+    [6, 'From the first coffee to the first dance. So happy for you both. All my love, always.'],
+    [1, 'Two of the kindest people we know. Here’s to a lifetime of Sunday mornings and long dinners.'],
+  ] as [number, string][]
+).entries()) {
   void n
-  await payload.create({ collection: 'messages', data: { body, private: false }, user: asGuest(i), overrideAccess: true })
+  await payload.create({
+    collection: 'messages',
+    data: { body, private: false },
+    user: asGuest(i),
+    overrideAccess: true,
+  })
 }
 
 for (const [order, q] of questions.entries()) {
   await payload.create({
     collection: 'quiz-questions',
-    data: { question: q.question, order, options: q.options.map((text, idx) => ({ text, isCorrect: idx === q.correct })) },
+    data: {
+      question: q.question,
+      order,
+      options: q.options.map((text, idx) => ({ text, isCorrect: idx === q.correct })),
+    },
     overrideAccess: true,
   })
 }
