@@ -28,6 +28,12 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: path.resolve(dirname),
   },
+  experimental: {
+    // Turbopack's persistent build cache records every environment variable the build reads as `NAME/value`
+    // (PAYLOAD_SECRET included) in .next/cache. Hosts that scan build output for secrets (Netlify) then refuse the
+    // deploy, and it's a needless copy of the secret on disk. Production builds start clean on CI anyway.
+    turbopackFileSystemCacheForBuild: false,
+  },
 }
 
 export default withPayload(nextConfig, { devBundleServerPackages: false })

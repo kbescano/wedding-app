@@ -71,6 +71,12 @@ npm start
 - Development uses `data/wedding-dev.db` (schema syncs automatically); production uses `data/wedding.db` and applies
   the migrations in `src/migrations` on startup. Use a fresh database for production rather than reusing the dev one.
   If you change collections or fields, run `npm run migrate:create -- my-change` and commit the new migration.
+- **Serverless hosts (Netlify, Vercel, …) can't keep files.** The default setup stores the database (`data/`) and uploaded
+  photos (`media/`) on local disk, which is read-only or wiped between requests there. For those hosts use a remote
+  SQLite/Postgres database and object storage for photos (see Payload's storage adapters); a regular server or a
+  container with a persistent volume works as-is.
+- **Secrets scanning (Netlify).** `next.config.ts` turns off Turbopack's persistent *build* cache, which otherwise writes
+  every environment variable (including `PAYLOAD_SECRET`) into `.next/cache` and makes Netlify's scanner fail the deploy.
 - Serve over **HTTPS**. Behind a proxy (nginx, Caddy, Render, Fly…) make sure it forwards `X-Forwarded-Proto` so
   the guest cookie is marked `Secure`.
 - Set a strong `PAYLOAD_SECRET` and keep it. Changing it signs every guest out.
