@@ -1,0 +1,17 @@
+/node_modules
+/.next/
+/out/
+/build
+.DS_Store
+*.pem
+npm-debug.log*
+*.tsbuildinfo
+next-env.d.ts
+.env
+.env*.local
+# uploaded photos + local database
+/media
+/data
+
+# local Claude tooling
+/.claude

@@ -1,0 +1,51 @@
+{
+  "name": "wedding-app",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Guest-only wedding site on Next.js + Payload CMS: sealed invitation, memories, messages, quiz, RSVP and seating.",
+  "scripts": {
+    "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
+    "devsafe": "rm -rf .next && cross-env NODE_OPTIONS=--no-deprecation next dev",
+    "build": "cross-env NODE_OPTIONS=\"--no-deprecation --max-old-space-size=8000\" next build",
+    "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
+    "seed": "cross-env NODE_OPTIONS=--no-deprecation payload run src/seed.ts",
+    "migrate:create": "cross-env NODE_OPTIONS=--no-deprecation payload migrate:create",
+    "migrate": "cross-env NODE_OPTIONS=--no-deprecation payload migrate",
+    "check:access": "node scripts/check-access.mjs",
+    "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
+    "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
+    "payload": "cross-env NODE_OPTIONS=--no-deprecation payload"
+  },
+  "engines": {
+    "node": "^18.20.2 || >=20.9.0"
+  },
+  "dependencies": {
+    "@fontsource-variable/fraunces": "^5.3.0",
+    "@fontsource-variable/jost": "^5.3.0",
+    "@payloadcms/db-sqlite": "3.90.1",
+    "@payloadcms/next": "3.90.1",
+    "@payloadcms/richtext-lexical": "3.90.1",
+    "@payloadcms/ui": "3.90.1",
+    "canvas-confetti": "^1.9.4",
+    "cross-env": "^10.1.0",
+    "dotenv": "^18.0.1",
+    "framer-motion": "^13.4.0",
+    "graphql": "^16.14.2",
+    "lucide-react": "^1.47.0",
+    "next": "^16.3.3",
+    "payload": "3.90.1",
+    "qrcode": "^1.5.4",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "sharp": "^0.35.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.4",
+    "@types/qrcode": "^1.5.6",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "tsx": "^4.23.15",
+    "typescript": "^5.7.3"
+  }
+}
