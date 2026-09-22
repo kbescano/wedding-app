@@ -62,7 +62,7 @@ const scenes = [
 
 const guests = [
   {
-    name: 'Welcome Guest',
+    name: 'Tita Baby',
     partySize: 2,
     tableLabel: 'Table 1',
     rsvp: 'yes',
@@ -70,13 +70,13 @@ const guests = [
     unlocked: true,
     code: 'WELCOME7',
   },
-  { name: 'Amara Okafor', partySize: 2, tableLabel: 'Table 1', rsvp: 'yes', rsvpCount: 2, unlocked: true },
-  { name: 'Daniel Reyes', partySize: 1, tableLabel: 'Table 2', rsvp: 'yes', rsvpCount: 1, unlocked: true },
-  { name: 'The Whitfield Family', partySize: 4, tableLabel: 'Table 3', rsvp: 'yes', rsvpCount: 3, unlocked: false },
-  { name: 'Priya Nair', partySize: 2, tableLabel: 'Table 2', rsvp: 'pending', rsvpCount: 0, unlocked: false },
-  { name: 'Tomás Ferreira', partySize: 1, tableLabel: 'Table 3', rsvp: 'no', rsvpCount: 0, unlocked: false },
-  { name: 'Grandma Rosa', partySize: 1, tableLabel: 'Table 1', rsvp: 'yes', rsvpCount: 1, unlocked: true },
-  { name: 'Lena & Marcus Bauer', partySize: 2, tableLabel: 'Table 4', rsvp: 'pending', rsvpCount: 0, unlocked: false },
+  { name: 'Andrea Villanueva', partySize: 2, tableLabel: 'Table 1', rsvp: 'yes', rsvpCount: 2, unlocked: true },
+  { name: 'Paolo Reyes', partySize: 1, tableLabel: 'Table 2', rsvp: 'yes', rsvpCount: 1, unlocked: true },
+  { name: 'The Mercado Family', partySize: 4, tableLabel: 'Table 3', rsvp: 'yes', rsvpCount: 3, unlocked: false },
+  { name: 'Katrina Santos', partySize: 2, tableLabel: 'Table 2', rsvp: 'pending', rsvpCount: 0, unlocked: false },
+  { name: 'Carlo Dizon', partySize: 1, tableLabel: 'Table 3', rsvp: 'no', rsvpCount: 0, unlocked: false },
+  { name: 'Lola Rosa', partySize: 1, tableLabel: 'Table 1', rsvp: 'yes', rsvpCount: 1, unlocked: true },
+  { name: 'Liza & Marco Bautista', partySize: 2, tableLabel: 'Table 4', rsvp: 'pending', rsvpCount: 0, unlocked: false },
 ] as const
 
 const questions = [
@@ -87,7 +87,7 @@ const questions = [
   },
   {
     question: 'Who said “I love you” first?',
-    options: ['Isabelle', 'Julian', 'At the same time', 'Nobody remembers'],
+    options: ['Nira', 'Ken', 'At the same time', 'Nobody remembers'],
     correct: 1,
   },
   {
@@ -97,7 +97,7 @@ const questions = [
   },
   {
     question: 'Which one of them is always late?',
-    options: ['Isabelle', 'Julian', 'Both, equally', 'Neither, they’re early'],
+    options: ['Nira', 'Ken', 'Both, equally', 'Neither, they’re early'],
     correct: 2,
   },
   {
@@ -145,8 +145,9 @@ for (const [n, [i, body]] of (
   })
 }
 
+const createdQuestions: { id: number; correct: number }[] = []
 for (const [order, q] of questions.entries()) {
-  await payload.create({
+  const doc = await payload.create({
     collection: 'quiz-questions',
     data: {
       question: q.question,
@@ -155,6 +156,29 @@ for (const [order, q] of questions.entries()) {
     },
     overrideAccess: true,
   })
+  createdQuestions.push({ id: doc.id, correct: q.correct })
+}
+
+// A few "tagged as true" guests with some quiz answers already in, so the leaderboard has data to show
+// as soon as the couple flips quizStatus to "live". `choice` picks the right option to land on
+// correct/wrong; `correct` is stored alongside it since that's what the scoreboard actually reads.
+const answers: [number, number[]][] = [
+  [0, [0, 1, 2, 3]], // Tita Baby: first 4 questions, all correct
+  [1, [0, 1]], // Andrea Villanueva: 2 correct
+  [2, [0]], // Paolo Reyes: 1 correct
+  [6, [-1]], // Lola Rosa: 1 wrong (answers question 0, picks a wrong option)
+]
+for (const [guestIdx, qIdxs] of answers) {
+  for (const qi of qIdxs) {
+    const wrong = qi < 0
+    const question = createdQuestions[wrong ? 0 : qi]
+    const choice = wrong ? (question.correct + 1) % questions[0].options.length : question.correct
+    await payload.create({
+      collection: 'quiz-answers',
+      data: { guest: asGuest(guestIdx).id, question: question.id, choice, correct: !wrong },
+      overrideAccess: true,
+    })
+  }
 }
 
 for (const [i, s] of scenes.entries()) {

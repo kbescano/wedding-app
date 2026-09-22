@@ -61,8 +61,8 @@ export const Event: GlobalConfig = {
             {
               type: 'row',
               fields: [
-                { name: 'partner1', type: 'text', required: true, defaultValue: 'Isabelle' },
-                { name: 'partner2', type: 'text', required: true, defaultValue: 'Julian' },
+                { name: 'partner1', type: 'text', required: true, defaultValue: 'Nira' },
+                { name: 'partner2', type: 'text', required: true, defaultValue: 'Ken' },
               ],
             },
             {
@@ -95,8 +95,8 @@ export const Event: GlobalConfig = {
               defaultValue: 'We can’t wait to celebrate with you.',
               label: 'A few words on the invitation',
             },
-            { name: 'venue', type: 'text', defaultValue: 'The Glasshouse at Willow Bend' },
-            { name: 'address', type: 'text', defaultValue: '12 Orchard Lane, Willow Bend' },
+            { name: 'venue', type: 'text', defaultValue: 'The Garden Pavilion at Tagaytay' },
+            { name: 'address', type: 'text', defaultValue: '123 Aguinaldo Highway, Tagaytay City, Cavite' },
             {
               name: 'mapUrl',
               type: 'text',
@@ -109,13 +109,13 @@ export const Event: GlobalConfig = {
         {
           label: 'Dress code',
           fields: [
-            { name: 'dressCode', type: 'text', defaultValue: 'Garden formal' },
+            { name: 'dressCode', type: 'text', defaultValue: 'Garden formal (barong and filipiniana welcome)' },
             {
               name: 'dressNote',
               type: 'textarea',
               maxLength: 300,
               defaultValue:
-                'Think deep greens, warm neutrals and soft golds. Flats or block heels are best, as the lawn is soft.',
+                'Think deep greens, warm neutrals and soft golds — barong tagalog and filipiniana are especially welcome. Flats or block heels are best, as the lawn is soft.',
             },
             {
               name: 'swatches',
@@ -145,11 +145,15 @@ export const Event: GlobalConfig = {
               maxRows: 30,
               labels: { singular: 'Item', plural: 'Items' },
               defaultValue: [
-                { time: '15:30', title: 'Guests arrive', detail: 'Welcome drinks on the terrace.' },
-                { time: '16:00', title: 'Ceremony', detail: 'Vows beneath the glass dome.' },
-                { time: '17:00', title: 'Cocktail hour', detail: 'Canapés, music and the first photos.' },
+                { time: '15:30', title: 'Guests arrive', detail: 'Welcome drinks with a view of Taal Volcano.' },
+                { time: '16:00', title: 'Ceremony', detail: 'Vows beneath the garden pavilion.' },
+                { time: '17:00', title: 'Cocktail hour', detail: 'Pulutan, music and the first photos.' },
                 { time: '18:30', title: 'Dinner', detail: 'Find your table and settle in.' },
-                { time: '20:30', title: 'First dance & party', detail: 'The quiz goes live somewhere in between.' },
+                {
+                  time: '20:30',
+                  title: 'First dance & party',
+                  detail: 'The money dance, then the quiz goes live somewhere in between.',
+                },
               ],
               fields: [
                 {
@@ -185,9 +189,9 @@ export const Event: GlobalConfig = {
               type: 'array',
               maxRows: 10,
               labels: { singular: 'Meal option', plural: 'Meal options' },
-              defaultValue: ['Herb-roasted chicken', 'Seared salmon', 'Wild mushroom risotto (vegetarian)'].map(
-                (option) => ({ option }),
-              ),
+              defaultValue: ['Chicken inasal', 'Beef kare-kare', 'Pancit bihon (vegetarian)'].map((option) => ({
+                option,
+              })),
               fields: [{ name: 'option', type: 'text', required: true, maxLength: 80 }],
             },
           ],
