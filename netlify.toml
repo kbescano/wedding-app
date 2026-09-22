@@ -9,6 +9,11 @@
   # intended use of SECRETS_SCAN_OMIT_PATHS. Scoped to cache directories only, so a secret that
   # actually leaked into real output (a page, an API response, a log) still fails the build.
   SECRETS_SCAN_OMIT_PATHS = ".next/cache/**,.netlify/.next/cache/**,.netlify/**/cache/**"
+  # R2_BUCKET is a bucket *name*, not a credential — access is controlled by R2_ACCESS_KEY_ID /
+  # R2_SECRET_ACCESS_KEY, which stay scanned. It's exempted here because whatever name you pick can
+  # coincidentally collide with ordinary strings elsewhere in the repo (e.g. it matched this
+  # project's own package.json "name" field once), which isn't a real leak.
+  SECRETS_SCAN_OMIT_KEYS = "R2_BUCKET"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
