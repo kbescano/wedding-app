@@ -75,10 +75,9 @@ npm start
   photos (`media/`) on local disk, which is read-only or wiped between requests there — every request 500s if you deploy
   the defaults as-is. A regular server or a container with a persistent volume needs no changes; for a serverless host,
   set the env vars documented in `.env.example` to point the database at [Turso](https://turso.tech) (`DATABASE_URI` +
-  `TURSO_AUTH_TOKEN`, same SQLite adapter) and photo uploads at an S3-compatible bucket such as
-  [Cloudflare R2](https://developers.cloudflare.com/r2/) (`S3_BUCKET`, `S3_ENDPOINT`, `S3_ACCESS_KEY_ID`,
-  `S3_SECRET_ACCESS_KEY`). Photos still serve through Payload's own route and respect the normal access rules — the
-  bucket itself doesn't need to be public.
+  `TURSO_AUTH_TOKEN`, same SQLite adapter) and photo uploads at [Cloudflare R2](https://developers.cloudflare.com/r2/)
+  (`R2_BUCKET`, `R2_ENDPOINT`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`). Photos still serve through Payload's own
+  route and respect the normal access rules — the bucket itself doesn't need to be public.
 - **Secrets scanning (Netlify).** `next.config.ts` turns off Turbopack's persistent *build* cache, which otherwise writes
   every environment variable (including `PAYLOAD_SECRET`) into `.next/cache` and makes Netlify's scanner fail the deploy;
   `package.json`'s `prebuild`/`postbuild` scripts also clear `.next/cache` as a second layer. `netlify.toml` pins the

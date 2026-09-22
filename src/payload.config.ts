@@ -30,22 +30,22 @@ if (databaseURI.startsWith('file:')) {
 }
 
 // Same story for uploaded photos: local disk (media/) only survives on a host with a persistent volume. Set
-// S3_BUCKET (plus S3_ENDPOINT for an S3-compatible host like Cloudflare R2) to store them remotely instead.
-// Reads still go through Payload's own /api/photos/file route (disablePayloadAccessControl stays unset), so the
-// existing canView access rule keeps applying — the bucket itself never needs to be public.
-const s3Bucket = process.env.S3_BUCKET
-const plugins: Plugin[] = s3Bucket
+// R2_BUCKET (plus R2_ENDPOINT) to store them on Cloudflare R2 instead. Reads still go through Payload's own
+// /api/photos/file route (disablePayloadAccessControl stays unset), so the existing canView access rule keeps
+// applying — the bucket itself never needs to be public.
+const r2Bucket = process.env.R2_BUCKET
+const plugins: Plugin[] = r2Bucket
   ? [
       s3Storage({
         collections: { photos: true },
-        bucket: s3Bucket,
+        bucket: r2Bucket,
         config: {
-          region: process.env.S3_REGION || 'auto',
-          endpoint: process.env.S3_ENDPOINT,
-          forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
+          region: 'auto',
+          endpoint: process.env.R2_ENDPOINT,
+          forcePathStyle: true,
           credentials: {
-            accessKeyId: process.env.S3_ACCESS_KEY_ID || '',
-            secretAccessKey: process.env.S3_SECRET_ACCESS_KEY || '',
+            accessKeyId: process.env.R2_ACCESS_KEY_ID || '',
+            secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || '',
           },
         },
       }),
