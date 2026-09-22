@@ -72,11 +72,19 @@ npm start
   the migrations in `src/migrations` on startup. Use a fresh database for production rather than reusing the dev one.
   If you change collections or fields, run `npm run migrate:create -- my-change` and commit the new migration.
 - **Serverless hosts (Netlify, Vercel, …) can't keep files.** The default setup stores the database (`data/`) and uploaded
-  photos (`media/`) on local disk, which is read-only or wiped between requests there. For those hosts use a remote
-  SQLite/Postgres database and object storage for photos (see Payload's storage adapters); a regular server or a
-  container with a persistent volume works as-is.
+  photos (`media/`) on local disk, which is read-only or wiped between requests there — every request 500s if you deploy
+  the defaults as-is. A regular server or a container with a persistent volume needs no changes; for a serverless host,
+  set the env vars documented in `.env.example` to point the database at [Turso](https://turso.tech) (`DATABASE_URI` +
+  `TURSO_AUTH_TOKEN`, same SQLite adapter) and photo uploads at an S3-compatible bucket such as
+  [Cloudflare R2](https://developers.cloudflare.com/r2/) (`S3_BUCKET`, `S3_ENDPOINT`, `S3_ACCESS_KEY_ID`,
+  `S3_SECRET_ACCESS_KEY`). Photos still serve through Payload's own route and respect the normal access rules — the
+  bucket itself doesn't need to be public.
 - **Secrets scanning (Netlify).** `next.config.ts` turns off Turbopack's persistent *build* cache, which otherwise writes
-  every environment variable (including `PAYLOAD_SECRET`) into `.next/cache` and makes Netlify's scanner fail the deploy.
+  every environment variable (including `PAYLOAD_SECRET`) into `.next/cache` and makes Netlify's scanner fail the deploy;
+  `package.json`'s `prebuild`/`postbuild` scripts also clear `.next/cache` as a second layer. `netlify.toml` pins the
+  build command to `npm run build` (so those scripts always run) and scopes `SECRETS_SCAN_OMIT_PATHS` to cache
+  directories only, since Netlify's own Next.js runtime plugin repackages `.next` for serverless functions in a step
+  that runs after the build command and isn't covered by the scripts above.
 - Serve over **HTTPS**. Behind a proxy (nginx, Caddy, Render, Fly…) make sure it forwards `X-Forwarded-Proto` so
   the guest cookie is marked `Secure`.
 - Set a strong `PAYLOAD_SECRET` and keep it. Changing it signs every guest out.

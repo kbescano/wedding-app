@@ -1,0 +1,14 @@
+[build]
+  command = "npm run build"
+
+[build.environment]
+  # Netlify's Next.js runtime plugin repackages `.next` for serverless functions in a step that
+  # runs after our own build command, so it isn't covered by the `postbuild` cache cleanup in
+  # package.json. `.next/cache` (and its copy under `.netlify/.next/cache`) is intermediate
+  # Turbopack build cache, not code that is ever served — Netlify's own docs list this as the
+  # intended use of SECRETS_SCAN_OMIT_PATHS. Scoped to cache directories only, so a secret that
+  # actually leaked into real output (a page, an API response, a log) still fails the build.
+  SECRETS_SCAN_OMIT_PATHS = ".next/cache/**,.netlify/.next/cache/**,.netlify/**/cache/**"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
