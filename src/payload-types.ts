@@ -223,7 +223,6 @@ export interface Photo {
    * Set automatically from who uploaded it.
    */
   owner?: (number | null) | Guest;
-  _objectKey?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -448,7 +447,6 @@ export interface PhotosSelect<T extends boolean = true> {
   caption?: T;
   author?: T;
   owner?: T;
-  _objectKey?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
